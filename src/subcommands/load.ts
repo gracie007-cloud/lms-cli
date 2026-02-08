@@ -18,11 +18,12 @@ import fuzzy from "fuzzy";
 import { getCliPref } from "../cliPref.js";
 import { addCreateClientOptions, createClient, type CreateClientArgs } from "../createClient.js";
 import { formatElapsedTime } from "../formatElapsedTime.js";
-import { formatSizeBytes1000 } from "../formatSizeBytes1000.js";
+import { formatSizeBytes1000, formatSizeBytes1024 } from "../formatBytes.js";
 import { addLogLevelOptions, createLogger, type LogLevelArgs } from "../logLevel.js";
 import { runPromptWithExitHandling } from "../prompt.js";
 import { Spinner } from "../Spinner.js";
 import { createRefinedNumberParser } from "../types/refinedNumber.js";
+import { fuzzyHighlightOptions, searchTheme } from "../inquirerTheme.js";
 
 const gpuOptionParser = (str: string): number => {
   str = str.trim().toLowerCase();
@@ -343,13 +344,11 @@ async function selectModel(
           chalk.green(`Select a model to ${estimateOnly === true ? "estimate" : "load"}`) +
           chalk.dim(" |"),
         pageSize,
+        theme: searchTheme,
         source: async (input: string | undefined, { signal }: { signal: AbortSignal }) => {
           void signal;
           const searchTerm = input ?? initialSearch;
-          const options = fuzzy.filter(searchTerm, modelPaths, {
-            pre: "\x1b[91m",
-            post: "\x1b[39m",
-          });
+          const options = fuzzy.filter(searchTerm, modelPaths, fuzzyHighlightOptions);
           return options.map(option => {
             const model = models[option.index];
             const displayName =
@@ -431,10 +430,10 @@ function printEstimatedResourceUsage(
     logger.info(`GPU Offload: ${gpuOffloadRatio * 100}%`);
   }
   logger.info(
-    `Estimated GPU Memory:   ${colorFunc(formatSizeBytes1000(estimate.memory.totalVramBytes))}`,
+    `Estimated GPU Memory:   ${colorFunc(formatSizeBytes1024(estimate.memory.totalVramBytes))}`,
   );
   logger.info(
-    `Estimated Total Memory: ${colorFunc(formatSizeBytes1000(estimate.memory.totalBytes))}`,
+    `Estimated Total Memory: ${colorFunc(formatSizeBytes1024(estimate.memory.totalBytes))}`,
   );
 
   if (estimate.memory.confidence === "low") {
