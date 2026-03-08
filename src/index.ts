@@ -15,7 +15,7 @@ import { dev } from "./subcommands/dev/index.js";
 import { flags } from "./subcommands/flags.js";
 import { get } from "./subcommands/get.js";
 import { importCmd } from "./subcommands/importCmd.js";
-import { link } from "./subcommands/link.js";
+import { link } from "./subcommands/link/index.js";
 import { ls, ps } from "./subcommands/list.js";
 import { load } from "./subcommands/load.js";
 import { log } from "./subcommands/log.js";
@@ -111,8 +111,7 @@ function createHelpConfiguration(maxWidth: number, helpMessageGap: number): Help
   return {
     helpWidth: maxWidth,
     commandUsage: command => chalk.bold(`${getCommandPath(command)} ${command.usage()}`),
-    subcommandTerm: (command: CommandUnknownOpts) =>
-      formatCommandTerm(command, helpMessageGap),
+    subcommandTerm: (command: CommandUnknownOpts) => formatCommandTerm(command, helpMessageGap),
     subcommandDescription: (command: { description(): string }) => command.description(),
     visibleOptions: command =>
       command.options.filter(
@@ -168,6 +167,7 @@ Join our Discord:     ${chalk.blue("https://discord.gg/lmstudio")}`,
 
 addCommandsGroup("Local models", [chat, get, load, unload, ls, ps, importCmd], "#22D3EE");
 addCommandsGroup("Serve", [server, log], "#34D399");
+addCommandsGroup("Remote Instances", [link], "#818CF8");
 addCommandsGroup("Runtime", [runtime], "#C084FC");
 addCommandsGroup("Develop & Publish (Beta)", [clone, push, dev, login, logout, whoami], "#F9A8D4");
 
@@ -177,7 +177,6 @@ program.addCommand(daemon, { hidden: true });
 program.addCommand(flags, { hidden: true });
 program.addCommand(status, { hidden: true });
 program.addCommand(version, { hidden: true });
-program.addCommand(link, { hidden: true });
 
 applyHelpConfigurationRecursively(program, rootHelpConfig, subcommandHelpConfig);
 
